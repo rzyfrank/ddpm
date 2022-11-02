@@ -1,5 +1,5 @@
 import copy
-
+import time
 from torch.optim import Adam
 import torch
 from diffusion_lib import Unet
@@ -12,6 +12,7 @@ from torchvision import transforms, datasets
 from torch.utils.data import DataLoader
 from diffusion_lib import EMA
 from diffusion_lib import cycle
+from einops import reduce
 
 
 
@@ -60,13 +61,6 @@ def main(args):
         num_workers=0
     )
 
-    reverse_transform = transforms.Compose([
-        transforms.Lambda(lambda t: (t + 1) / 2),
-        # transforms.Lambda(lambda t: t.permute(1, 2, 0)),
-        transforms.Lambda(lambda t: t * 255.),
-        # transforms.Lambda(lambda t: t.numpy().astype(np.uint8))
-    ])
-
     model = Unet(
         dim=args.dim,
         channels=args.channels,
@@ -83,9 +77,11 @@ def main(args):
         ema_model.load_state_dict(last_info['ema_model'])
         optimizer.load_state_dict(last_info['optimizer'])
         steps = last_info['step'] + 1
+        logger.log('steps={:}'.format(steps))
         logger.log('load pretrain diffusion_lib from {:}'.format(args.checkpoint))
     else:
         steps = 0
+        logger.log('steps={:}'.format(steps))
 
     ema = EMA(0.9999, steps)
 
@@ -115,7 +111,7 @@ def main(args):
         optimizer.step()
         ema.step_ema(ema_model, model)
 
-        if step != 0 and step % args.eval_freq == 0:
+        if step % args.eval_freq == 0:
             test_loss = 0
             with torch.no_grad():
                 model.eval()
@@ -143,6 +139,7 @@ def main(args):
                 'step': step
             }
             torch.save(save_info, logger.path('diffusion_lib') / 'seed-{:}-{:}.pth'.format(args.rand_seed, logger.get_time()))
+
 
 
 

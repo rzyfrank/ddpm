@@ -27,15 +27,15 @@ class Residual(nn.Module):
         return self.fn(x, *args, **kwargs) + x
 
 
-def Upsample(dim):
+def Upsample(dim, dim_out=None):
     return nn.Sequential(
         nn.Upsample(scale_factor=2, mode='nearest'),
-        nn.Conv2d(dim,dim, kernel_size=3, padding=1)
+        nn.Conv2d(dim, default(dim_out, dim), kernel_size=3, padding=1)
     )
 
 
-def Downsample(dim):
-    return nn.Conv2d(dim, dim, 3, 2, 1)
+def Downsample(dim, dim_out=None):
+    return nn.Conv2d(dim, default(dim_out, dim), 4, 2, 1)
 
 # def Upsample(dim):
 #     return nn.ConvTranspose2d(dim, dim, 4, 2, 1)
@@ -60,3 +60,10 @@ class SinusoidalPositionEmbeddings(nn.Module):
 def time_for_file():
   ISOTIMEFORMAT='%d-%h-at-%H-%M-%S'
   return '{}'.format(time.strftime( ISOTIMEFORMAT, time.gmtime(time.time()) ))
+
+
+def count_network_param(net):
+  num_params = 0
+  for param in net.parameters():
+    num_params += param.numel()
+  return num_params

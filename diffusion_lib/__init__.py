@@ -7,3 +7,4 @@ from .beta_schedule import choose_beta_schedule
 from .model import Unet
 from .diffusion import Diffusion
 from .ema import EMA
+from .tool import count_network_param

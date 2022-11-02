@@ -25,7 +25,7 @@ def main(image_size, channels, timesteps, pretrain):
 
     samples = diffusion.sample(model, image_size, batch_size=1, channels=channels)
     random_index = 5
-
+    # print(samples[-1][0])
     reverse_transform = transforms.Compose([
         transforms.Lambda(lambda t: (t+1)/2),
         transforms.Lambda(lambda t: t.permute(1, 2, 0)),
@@ -35,7 +35,7 @@ def main(image_size, channels, timesteps, pretrain):
 
     ])
     img = reverse_transform(samples[-1][0])
-    img.show()
+    img.save('sample.jpg')
 
 
     # plt.imshow(samples[-1][0].reshape(image_size, image_size, channels))
@@ -46,5 +46,5 @@ def main(image_size, channels, timesteps, pretrain):
     # save_image(samples, './image.jpg')
 
 if __name__ == '__main__':
-    pretrain = 'D:\coding\diffusion\scripts\ddpm\cifar10-b64-dim64\checkpoint\seed-1821-30-Oct-at-17-35-49.pth'
+    pretrain = './scripts/ddpm/cifar10-b64-dim64-original/checkpoint/seed-9729-01-Nov-at-07-05-17.pth'
     main(32, 3, 1000, pretrain)
